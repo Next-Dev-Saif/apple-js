@@ -167,17 +167,13 @@ To test manually:
 node test.js
 ```
 
-You can also run the script engine directly:
 
-```bash
-node workers/index.js
-```
 
 ---
 
 ## ✅ License
 
-MIT © 2025 – Your Name
+MIT © 2025 – Next-Dev-Saif
 
 ---
 
