@@ -10,13 +10,13 @@
 ## 📦 Installation
 
 ```bash
-npm install apple-js
+npm install apple-js-stable
 ```
 
 Or run directly via:
 
 ```bash
-npx apple-js
+npx apple-js-stable
 ```
 
 ---
