@@ -4,7 +4,9 @@ const script = new Osascript();
 async function startTest() {
   
     await script.executeScript([script.appleCommands.display("Welcome to apple.js"),
-script.appleCommands.systemControl.setVolume(0)]);
+    script.appleCommands.speak("Welcome to apple js"),
+script.appleCommands.systemControl.setVolume(5),
+]);
 await script.executeSingleCommand(script.appleCommands.display("Bush !"))
     script.close();
 
