@@ -43,10 +43,14 @@ class Osascript {
    * Spawns the persistent background process (mainThread) used to run AppleScript commands.
    * This improves performance by avoiding repeated process spawning.
    */
-  constructor() {
-    this.mainThread = spawn("node", [path.join(__dirname, "./workers/index.js")], {
-      stdio: ["pipe", "pipe", "pipe"]
-    });
+  constructor(resourcePath=__dirname) {
+    const workerPath = path.join(resourcePath, "workers", "index.js");
+
+    this.mainThread = spawn(
+      process.execPath,     // node runtime
+      [workerPath],         // must be an array of strings
+      { stdio: ["pipe", "pipe", "pipe"] }
+    );
 
     this.mainThread.stderr.on("data", this.#errorHandler.bind(this));
     this.mainThread.stdout.on("data", this.#handleOutput.bind(this));
