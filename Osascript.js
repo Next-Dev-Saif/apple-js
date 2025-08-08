@@ -49,7 +49,8 @@ class Osascript {
     this.mainThread = spawn(
       process.execPath,     // node runtime
       [workerPath],         // must be an array of strings
-      { stdio: ["pipe", "pipe", "pipe"] }
+      { stdio: ["pipe", "pipe", "pipe"],
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" } }
     );
 
     this.mainThread.stderr.on("data", this.#errorHandler.bind(this));

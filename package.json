@@ -1,1 +1,33 @@
-{"type":"commonjs","name":"apple-js-stable","version":"1.0.1","description":"Apple js is the extension of osascript to javascript , run applescript commands via node js ,and implement js-like logic","main":"index.js","scripts":{"test":"echo \"Error: no test specified\" && exit 1"},"repository":{"type":"git","url":"git+https://github.com/DeveloperOfHephaestus/apple-js.git"},"keywords":["apple-js","osascript","applescript","to","javascript","applescript","vs","javascript"],"author":"Next-Dev-Saif","license":"ISC","bugs":{"url":"https://github.com/DeveloperOfHephaestus/apple-js/issues"},"homepage":"https://github.com/DeveloperOfHephaestus/apple-js#readme"}
+{
+  "type": "commonjs",
+  "name": "apple-js-stable",
+  "version": "1.0.3",
+  "description": "Apple js is the extension of osascript to javascript , run applescript commands via node js ,and implement js-like logic",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeveloperOfHephaestus/apple-js.git"
+  },
+  "keywords": [
+    "apple-js",
+    "osascript",
+    "applescript",
+    "to",
+    "javascript",
+    "applescript",
+    "vs",
+    "javascript"
+  ],
+  "author": "Next-Dev-Saif",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DeveloperOfHephaestus/apple-js/issues"
+  },
+  "homepage": "https://github.com/DeveloperOfHephaestus/apple-js#readme",
+  "dependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

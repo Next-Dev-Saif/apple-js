@@ -104,6 +104,22 @@ static returnOf(property, varName) {
         }
         return `say ${safeText}`;
     }
+
+/**
+ * Toggles full screen of the frontmost app window.
+ */
+static fullscreenFrontApp() {
+  return `tell application "System Events"
+  tell application process (name of first application process whose frontmost is true)
+    tell window 1
+      set value of attribute "AXFullScreen" to not (value of attribute "AXFullScreen")
+    end tell
+  end tell
+end tell`;
+}
+
+
+
     /**
  * Waits until the given application becomes frontmost.
  * @param {string} appName - The name of the application to wait for.
@@ -192,7 +208,6 @@ static browser = {
         `\tend if`,
         `\ttell front window`,
         `\t\tset newTab to make new tab with properties {URL: "${url}"}`,
-        `\t\tset active tab index to (index of newTab)`,
         `\tend tell`,
         `end tell`
       ].join("\n");
