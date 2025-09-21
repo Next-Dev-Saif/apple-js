@@ -440,7 +440,551 @@ static systemControl = {
   }
 };
 
-  
+/**
+ * Fun & experimental AI-related utilities (Siri, ChatGPT, etc.)
+ * Note: Siri scripting is limited — these are conceptual or use workarounds.
+ */
+static ai = {
+  /**
+   * Ask Siri a question (macOS Ventura+ with Siri enabled)
+   * Requires Accessibility permissions.
+   * @param {string} question - What to ask Siri
+   * @returns {string} AppleScript code
+   */
+  askSiri(question) {
+      return [
+          `tell application "System Events"`,
+          `\ttell process "Siri"`,
+          `\t\tset frontmost to true`,
+          `\tend tell`,
+          `end tell`,
+          `delay 0.5`,
+          `tell application "System Events" to keystroke "${question}"`,
+          `tell application "System Events" to keystroke return`
+      ].join("\n");
+  },
+
+  /**
+   * Open ChatGPT in browser and auto-paste prompt (if logged in)
+   * @param {string} prompt - Your question for ChatGPT
+   * @returns {string} AppleScript code
+   */
+  openChatGPTWithPrompt(prompt) {
+      const encoded = encodeURIComponent(prompt);
+      const url = `https://chat.openai.com/?q=${encoded}`;
+      return [
+          AppleScript.browser.openInSafari(url),
+          `delay 2`,
+          `tell application "System Events" to keystroke "v" using {command down}`
+      ].join("\n");
+  },
+
+  /**
+   * Speak a joke using system voice (fetches from a hardcoded list)
+   * @returns {string} AppleScript code
+   */
+  tellJoke() {
+      const jokes = [
+          "Why don’t scientists trust atoms? Because they make up everything!",
+          "I told my computer I needed a break... now it won’t stop sending me Kit-Kats.",
+          "Why did the JavaScript developer go broke? Because he used up all his cache!"
+      ];
+      const joke = jokes[Math.floor(Math.random() * jokes.length)];
+      return AppleScript.speak(joke, "Samantha");
+  }
+};
+
+/**
+* Media control utilities — Music, QuickTime, Photos
+*/
+static media = {
+  /**
+   * Play/Pause Music.app (formerly iTunes)
+   */
+  toggleMusicPlayPause() {
+      return `tell application "Music" to playpause`;
+  },
+
+  /**
+   * Play specific track in Music.app
+   * @param {string} trackName
+   * @param {string} artistName (optional)
+   */
+  playTrack(trackName, artistName = null) {
+      if (artistName) {
+          return [
+              `tell application "Music"`,
+              `\tplay track "${trackName}" of artist "${artistName}"`,
+              `end tell`
+          ].join("\n");
+      }
+      return [
+          `tell application "Music"`,
+          `\tplay track "${trackName}"`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Increase Music volume by 10%
+   */
+  musicVolumeUp() {
+      return `tell application "Music" to set sound volume to (sound volume + 10)`;
+  },
+
+  /**
+   * Decrease Music volume by 10%
+   */
+  musicVolumeDown() {
+      return `tell application "Music" to set sound volume to (sound volume - 10)`;
+  },
+
+  /**
+   * Start screen recording via QuickTime Player
+   */
+  startScreenRecording() {
+      return [
+          `tell application "QuickTime Player"`,
+          `\tactivate`,
+          `\tnew screen recording`,
+          `\tdelay 1`,
+          `\ttell application "System Events" to click button "Record" of window 1`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Take photo with FaceTime HD Camera using Photo Booth
+   */
+  takePhotoBoothPhoto() {
+      return [
+          `tell application "Photo Booth" to activate`,
+          `delay 1`,
+          `tell application "System Events" to keystroke " "`
+      ].join("\n");
+  }
+};
+
+/**
+* Advanced UI interaction — simulate mouse, clicks, drag
+* Requires: System Preferences > Security & Privacy > Accessibility > Script Editor / Terminal
+*/
+static ui = {
+  /**
+   * Click at specific screen coordinates (x, y)
+   * @param {number} x
+   * @param {number} y
+   */
+  clickAt(x, y) {
+      return [
+          `tell application "System Events"`,
+          `\ttell application process "Finder"`,
+          `\t\tclick at {${x}, ${y}}`,
+          `\tend tell`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Double-click at coordinates
+   * @param {number} x
+   * @param {number} y
+   */
+  doubleClickAt(x, y) {
+      return [
+          `tell application "System Events"`,
+          `\ttell application process "Finder"`,
+          `\t\tdouble click at {${x}, ${y}}`,
+          `\tend tell`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Right-click (secondary click) at coordinates
+   * @param {number} x
+   * @param {number} y
+   */
+  rightClickAt(x, y) {
+      return [
+          `tell application "System Events"`,
+          `\ttell application process "Finder"`,
+          `\t\tclick at {${x}, ${y}} right`,
+          `\tend tell`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Type a string with optional delay between keystrokes (for realism)
+   * @param {string} text
+   * @param {number} delaySeconds (optional, per keystroke)
+   */
+  typeText(text, delaySeconds = 0.05) {
+      const lines = [];
+      for (let char of text) {
+          if (char === "\\") {
+              lines.push(`keystroke "\\\\"`);
+          } else if (char === '"') {
+              lines.push(`keystroke "\\""`); // Escape AppleScript quote
+          } else {
+              lines.push(`keystroke "${char}"`);
+          }
+          if (delaySeconds > 0) lines.push(`delay ${delaySeconds}`);
+      }
+      return [
+          `tell application "System Events"`,
+          `\t${lines.join("\n\t")}`,
+          `end tell`
+      ].join("\n");
+  }
+};
+
+/**
+* macOS User Notification Center alerts
+* Requires: macOS 10.8+
+*/
+static notifications = {
+  /**
+   * Display a user notification with title, subtitle, and message
+   * @param {string} title
+   * @param {string} subtitle
+   * @param {string} message
+   */
+  alert(title, subtitle, message) {
+      return `display notification "${message}" with title "${title}" subtitle "${subtitle}"`;
+  },
+
+  /**
+   * Simple banner notification
+   * @param {string} message
+   */
+  banner(message) {
+      return `display notification "${message}"`;
+  },
+
+  /**
+   * Alert with sound
+   * @param {string} title
+   * @param {string} message
+   * @param {string} soundName (e.g., "default", "Glass", "Blow", "Frog")
+   */
+  alertWithSound(title, message, soundName = "default") {
+      return `display notification "${message}" with title "${title}" sound name "${soundName}"`;
+  }
+};
+
+/**
+* Fun & Easter Egg Methods
+*/
+static fun = {
+  /**
+   * Make the screen flash white briefly (like a camera flash)
+   */
+  screenFlash() {
+      return [
+          `tell application "System Events"`,
+          `\tkey code 144 using {command down, option down} -- Decrease contrast`,
+          `\tdelay 0.1`,
+          `\tkey code 145 using {command down, option down} -- Increase contrast`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Make the Dock bounce an app icon (if app is not running)
+   * @param {string} appName (e.g., "Safari")
+   */
+  bounceDockIcon(appName) {
+      return [
+          `tell application "System Events"`,
+          `\ttell dock item "${appName}" of dock preferences`,
+          `\t\tlaunch`,
+          `\tend tell`,
+          `end tell`
+      ].join("\n");
+  },
+
+  /**
+   * Hide all windows except frontmost app (like ⌘+Option+H)
+   */
+  hideOtherApps() {
+      return `tell application "System Events" to keystroke "h" using {command down, option down}`;
+  },
+
+  /**
+   * Play the famous "Sosumi" alert sound (classic Mac easter egg)
+   */
+  playSosumi() {
+      return `do shell script "afplay /System/Library/Sounds/Sosumi.aiff"`;
+  },
+
+  /**
+   * Make your Mac say something funny in a dramatic voice
+   * @param {string} phrase
+   */
+  dramaticAnnouncement(phrase = "The machines are rising.") {
+      return AppleScript.speak(phrase, "Zarvox");
+  }
+};
+
+  /**
+ * Opens a URL in the default browser (figures out which is default via shell).
+ * More reliable than guessing Safari or Chrome.
+ * @param {string} url - The URL to open.
+ * @returns {string} AppleScript code
+ */
+static openInDefaultBrowser(url) {
+  return `do shell script "open '${url}'"`;
+}
+
+/**
+* Gets the current date and time as a formatted string (via shell).
+* @param {string} format - Optional. Uses `date` command format (e.g., "+%Y-%m-%d %H:%M")
+* @returns {string} AppleScript code that returns the formatted date
+*/
+static getCurrentDateTime(format = "+%Y-%m-%d %H:%M:%S") {
+  return `do shell script "date '${format}'"`;
+}
+
+/**
+* Copies text to clipboard using pbcopy.
+* @param {string} text - Text to copy
+* @returns {string} AppleScript code
+*/
+static copyToClipboard(text) {
+  const safeText = text.replace(/"/g, '\\"').replace(/'/g, `\\'`);
+  return `do shell script "echo '${safeText}' | pbcopy"`;
+}
+
+/**
+* Pastes clipboard contents (simulates Cmd+V).
+* Useful after copyToClipboard or manual copy.
+* @returns {string} AppleScript code
+*/
+static pasteFromClipboard() {
+  return `tell application "System Events" to keystroke "v" using {command down}`;
+}
+
+/**
+* Simulates pressing a global hotkey (e.g., Cmd+Space for Spotlight).
+* @param {string} key - Single key or keycode (e.g., "space", "123")
+* @param {string[]} modifiers - Array like ["command", "shift", "control", "option"]
+* @returns {string} AppleScript code
+*/
+static pressHotkey(key, modifiers = []) {
+  const modMap = {
+      command: "command down",
+      shift: "shift down",
+      control: "control down",
+      option: "option down"
+  };
+  const mods = modifiers.map(m => modMap[m] || "").filter(Boolean).join(", ");
+  const usingClause = mods ? ` using {${mods}}` : "";
+  return `tell application "System Events" to keystroke "${key}"${usingClause}`;
+}
+
+/**
+* Gets the name of the frontmost application.
+* @returns {string} AppleScript code that returns app name
+*/
+static getFrontmostApp() {
+  return `tell application "System Events" to get name of first application process whose frontmost is true`;
+}
+
+/**
+* Displays a large alert using 'osascript' with bigger dialog (via shell).
+* More attention-grabbing than display dialog.
+* @param {string} message
+* @param {string} title (optional)
+* @returns {string} AppleScript code
+*/
+static bigAlert(message, title = "Alert") {
+  const safeMsg = message.replace(/"/g, '\\"');
+  const safeTitle = title.replace(/"/g, '\\"');
+  return `do shell script "osascript -e 'display alert \\"${safeTitle}\\" message \\"${safeMsg}\\"'"`
+}
+
+/**
+* Shows a notification AND speaks it aloud — great for accessibility or attention.
+* @param {string} message
+* @param {string} voice (optional)
+* @returns {string} AppleScript code
+*/
+static announce(message, voice = "Alex") {
+  return [
+      AppleScript.notifications.banner(message),
+      AppleScript.speak(message, voice)
+  ].join("\n");
+}
+
+/**
+* Gets battery percentage of MacBook (if available).
+* @returns {string} AppleScript code that returns battery % as string
+*/
+static getBatteryLevel() {
+  return `do shell script "pmset -g batt | grep -Eo '\\d+%' | cut -d% -f1"`;
+}
+
+/**
+* Checks if laptop is plugged in.
+* @returns {string} AppleScript code returning "AC Power" or "Battery Power"
+*/
+static getPowerSource() {
+  return `do shell script "pmset -g ps | grep 'Now drawing' | cut -d'(' -f2 | cut -d' ' -f1"`;
+}
+
+/**
+* Sets screen brightness via shell (requires sudo or brightness tool installed).
+* @param {number} level - 0.0 to 1.0
+* @returns {string} AppleScript code (note: may require external tool like 'brightness')
+*/
+static setBrightness(level) {
+  const clamped = Math.max(0, Math.min(1, level));
+  // Note: macOS doesn’t allow brightness via AppleScript natively — requires helper
+  return `-- ⚠️ Requires 'brightness' CLI tool: brew install brightness\n` +
+         `do shell script "brightness ${clamped}"`;
+}
+
+/**
+* Gets current screen resolution.
+* @returns {string} AppleScript code returning "width x height"
+*/
+static getScreenResolution() {
+  return `do shell script "system_profiler SPDisplaysDataType | grep Resolution | awk '{print $2, $4}' | tr -d '\\n'"`;
+}
+
+/**
+* Gets macOS version.
+* @returns {string} AppleScript code returning version string
+*/
+static getMacOSVersion() {
+  return `do shell script "sw_vers -productVersion"`;
+}
+
+/**
+* Gets username of current user.
+* @returns {string} AppleScript code
+*/
+static getCurrentUser() {
+  return `do shell script "whoami"`;
+}
+
+/**
+* Gets machine’s local hostname.
+* @returns {string} AppleScript code
+*/
+static getHostName() {
+  return `do shell script "hostname"`;
+}
+
+/**
+* Creates a spoken countdown from N to 1, then says “Go!”.
+* Great for timers, presentations, or Pomodoro.
+* @param {number} startFrom - Number to start from (e.g., 5)
+* @param {string} voice - Voice to use
+* @returns {string} AppleScript code
+*/
+static countdown(startFrom = 5, voice = "Alex") {
+  const lines = [];
+  for (let i = startFrom; i >= 1; i--) {
+      lines.push(AppleScript.speak(i.toString(), voice));
+      lines.push(AppleScript.delay(1));
+  }
+  lines.push(AppleScript.speak("Go!", voice));
+  return lines.join("\n");
+}
+
+/**
+* Types “Hello World” with dramatic pauses and sound — perfect for demos.
+* @returns {string} AppleScript code
+*/
+static demoTypeHelloWorld() {
+  return [
+      AppleScript.speak("Initiating demo sequence", "Zarvox"),
+      AppleScript.delay(1),
+      AppleScript.ui.typeText("Hello", 0.3),
+      AppleScript.delay(0.5),
+      AppleScript.ui.typeText(" World!", 0.3),
+      AppleScript.delay(0.5),
+      AppleScript.fun.playSosumi(),
+      AppleScript.speak("Demo complete.", "Zarvox")
+  ].join("\n");
+}
+
+
+
+/**
+* Shuts down gently with spoken warning and countdown.
+* @param {number} countdownSeconds - How long to wait before shutdown (default 10)
+* @returns {string} AppleScript code
+*/
+static gentleShutdown(countdownSeconds = 10) {
+  const lines = [
+      AppleScript.speak(`System will shut down in ${countdownSeconds} seconds.`, "Alex"),
+      AppleScript.bigAlert(`Shutting down in ${countdownSeconds}s`, "System Alert")
+  ];
+  for (let i = countdownSeconds - 1; i > 0; i--) {
+      lines.push(AppleScript.speak(i.toString(), "Alex"));
+      lines.push(AppleScript.delay(1));
+  }
+  lines.push(AppleScript.speak("Goodbye.", "Alex"));
+  lines.push(AppleScript.systemControl.shutdown());
+  return lines.join("\n");
+}
+
+/**
+* “Focus Mode” — Hides all apps, mutes sound, enables Do Not Disturb, speaks confirmation.
+* @returns {string} AppleScript code
+*/
+static focusMode() {
+  return [
+      AppleScript.speak("Entering focus mode.", "Samantha"),
+      AppleScript.fun.hideOtherApps(),
+      AppleScript.systemControl.toggleMute(true),
+      AppleScript.systemControl.toggleDoNotDisturb(true),
+      AppleScript.setBrightness(0.7),
+      AppleScript.notifications.alert("🧘 Focus Mode", "Activated", "All distractions silenced.")
+  ].join("\n");
+}
+
+/**
+* “Party Mode” — Sets bright wallpaper, plays music, disables DND, speaks welcome.
+* @param {string} playlistName - Optional playlist to play in Music.app
+* @returns {string} AppleScript code
+*/
+static partyMode(playlistName = "Party Hits") {
+  return [
+      AppleScript.speak("Let’s party!", "Boing"),
+      AppleScript.systemControl.setVolume(80),
+      AppleScript.systemControl.toggleMute(false),
+      AppleScript.systemControl.toggleDoNotDisturb(false),
+      AppleScript.setBrightness(1.0),
+      AppleScript.shell(`osascript -e 'tell application "Music" to play playlist "${playlistName}"'`),
+      AppleScript.finder.setDesktopWallpaper("/System/Library/Desktop Pictures/Solid Colors/Red.png"),
+      AppleScript.notifications.alert("🎉 Party Mode", "Activated", "Crank it up!")
+  ].join("\n");
+}
+
+/**
+* Speaks the current time aloud every minute for N minutes — great for Pomodoro or accessibility.
+* @param {number} minutes - How many minutes to announce
+* @param {string} voice - Voice to use
+* @returns {string} AppleScript code
+*/
+static announceTimeEveryMinute(minutes = 5, voice = "Alex") {
+  const lines = [
+      AppleScript.speak(`Time announcer starting for ${minutes} minutes.`, voice)
+  ];
+  for (let i = 0; i < minutes; i++) {
+      lines.push(AppleScript.delay(60));
+      lines.push(AppleScript.speak("The time is now...", voice));
+      lines.push(`set currentTime to ${AppleScript.getCurrentDateTime("+%I:%M %p")}`);
+      lines.push(`say currentTime using "${voice}"`);
+  }
+  lines.push(AppleScript.speak("Time announcer finished.", voice));
+  return lines.join("\n");
+}
 
 
 }

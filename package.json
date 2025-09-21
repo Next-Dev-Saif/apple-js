@@ -1,11 +1,11 @@
 {
   "type": "commonjs",
   "name": "apple-js-stable",
-  "version": "1.0.3",
-  "description": "Apple js is the extension of osascript to javascript , run applescript commands via node js ,and implement js-like logic",
+  "version": "1.0.4",
+  "description": "Apple js is the extension of osascript to javascript , run applescript commands via node js ,and implement js-like logic . New methods are introduced in this version in ui ,notifications and ai check out.",
   "main": "index.js",
   "scripts": {
-    "test": "nodemon test"
+    "test": "node test"
   },
   "repository": {
     "type": "git",
