@@ -1,7 +1,7 @@
 {
   "type": "commonjs",
   "name": "apple-js-stable",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Apple js is the extension of osascript to javascript , run applescript commands via node js ,and implement js-like logic . New methods are introduced in this version in ui ,notifications and ai check out.",
   "main": "index.js",
   "scripts": {

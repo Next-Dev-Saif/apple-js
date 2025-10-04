@@ -80,28 +80,33 @@ class Osascript {
     if (current) current.resolve(output);
   }
 
-  /**
-   * Executes one or more AppleScript commands using a persistent subprocess.
-   * @async
-   * @param {string[]} appleCodeArray - Array of AppleScript lines to be joined and executed
-   * @returns {Promise<string>} Resolves with stdout result from AppleScript, or rejects with error
-   * @throws If the background thread is not running
-   */
-  async executeScript(appleCodeArray) {
-    if (!this.mainThread) {
-      throw new Error("Osascript runtime error: mainThread is not running");
-    }
-
-    const appleScript = appleCodeArray?.join("\n");
-    console.log("Running Apple Script\n", appleScript);
-
-    const command = `osascript -e '${appleScript.replace(/'/g, "\\'")}'\n`;
-
-    return new Promise((resolve, reject) => {
-      this.#pending.push({ resolve, reject });
-      this.mainThread.stdin.write(command);
-    });
+/**
+ * Executes one or more AppleScript commands using a persistent subprocess.
+ * Uses osascript's stdin instead of -e flags, so quoting issues disappear.
+ */
+async executeScript(appleCodeArray) {
+  if (!this.mainThread) {
+    throw new Error("Osascript runtime error: mainThread is not running");
   }
+  if (!Array.isArray(appleCodeArray) || appleCodeArray.length === 0) {
+    throw new Error("executeScript expects a non-empty array of AppleScript lines");
+  }
+
+  // join lines exactly as AppleScript expects
+  const scriptText = appleCodeArray.join("\n");
+
+  // this version sends the script via standard input, not -e '...'
+  const command = `osascript <<'__APPLESCRIPT__'\n${scriptText}\n__APPLESCRIPT__\n`;
+
+  console.log("[Osascript] Running AppleScript (via stdin)\n", command);
+
+  return new Promise((resolve, reject) => {
+    this.#pending.push({ resolve, reject });
+    this.mainThread.stdin.write(command);
+  });
+}
+
+
 
   /**
    * Restarts the background AppleScript execution thread.
